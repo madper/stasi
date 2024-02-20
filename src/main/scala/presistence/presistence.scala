@@ -1,6 +1,6 @@
 package presistence
 
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+// import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 import io.getquill._
 import io.getquill.jdbczio.Quill
 import java.sql.SQLException
@@ -18,12 +18,14 @@ case class DeviceHeartBeat(
 
 class PresistenceService(quill: Quill.Postgres[SnakeCase]) {
   import quill._
-  inline def insertDeviceHeartBeat(
+  inline def _insertDeviceHeartBeat(
       dhb: DeviceHeartBeat
-  ): ZIO[Any, SQLException, Long] = {
-    val a = quote { query[DeviceHeartBeat].insertValue(lift(dhb)) }
-    run(a)
+  ) = {
+     query[DeviceHeartBeat].insertValue(lift(dhb))
   }
+
+  def insertDeviceHeartBeat(dhb: DeviceHeartBeat) = run(_insertDeviceHeartBeat(dhb))
+
 }
 
 object PresistenceService {
