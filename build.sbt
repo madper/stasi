@@ -14,12 +14,14 @@ lazy val root = project
       "dev.zio" %% "zio" % zioVersion,
       "dev.zio" %% "zio-streams" % zioVersion,
       "io.nats" % "jnats" % "2.17.0",
-      "dev.zio" %% "zio-logging" % "2.1.15",
+      "dev.zio" %% "zio-logging" % "2.2.1",
       "io.getquill"          %% "quill-jdbc-zio" % "4.8.0",
       "org.postgresql"       %  "postgresql"     % "42.3.1",
-      "dev.zio" %% "zio-json" % "0.6.2",
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion
+      "io.circe" %% "circe-parser" % circeVersion,
+      "ch.qos.logback" % "logback-classic" % "1.5.0",
+      // SLF4j v1 integration
+      "dev.zio" %% "zio-logging-slf4j" % "2.2.1"
     )
   )

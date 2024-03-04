@@ -1,31 +1,36 @@
 package presistence
 
-// import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 import io.getquill._
 import io.getquill.jdbczio.Quill
 import java.sql.SQLException
+import java.sql.Timestamp
+import java.time.Instant
 import zio._
+import io.circe._, io.circe.parser._, io.circe.syntax._, io.circe.generic.auto._
+import scala.util.Try
 
 case class DeviceHeartBeat(
-    timestamp: Long,
-    deviceID: String,
-    containers: Seq[String],
-    city: Option[Int],
-    ip: Option[String],
-    isp: Option[String],
-    region: Option[String]
+  timestamp: Instant,
+  deviceID: String,
+  containers: Seq[String],
+  city: Option[Int],
+  ip: Option[String],
+  isp: Option[String],
+  region: Option[String]
 )
 
-class PresistenceService(quill: Quill.Postgres[SnakeCase]) {
+implicit val decodeInstant: Decoder[Instant] = Decoder.decodeLong.emap{ long =>
+  Right(Instant.ofEpochMilli(long))
+}
+
+class PresistenceService(quill: Quill.Postgres[Literal]) {
   import quill._
-  inline def _insertDeviceHeartBeat(
+  def insertDeviceHeartBeat(
       dhb: DeviceHeartBeat
   ) = {
-     query[DeviceHeartBeat].insertValue(lift(dhb))
+    val a = quote { query[DeviceHeartBeat].insertValue(lift(dhb)) }
+    run(a)
   }
-
-  def insertDeviceHeartBeat(dhb: DeviceHeartBeat) = run(_insertDeviceHeartBeat(dhb))
-
 }
 
 object PresistenceService {

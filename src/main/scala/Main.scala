@@ -2,9 +2,9 @@ import zio._
 import zio.stream._
 import zio.Console._
 import presistence._
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 import io.getquill._
 import io.getquill.jdbczio.Quill
+import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
 import nats.NatsService
 import presistence.PresistenceService
@@ -12,9 +12,9 @@ import presistence.PresistenceService
 object Stasi extends ZIOAppDefault {
   def run = natsStream
     .provide(
-      NatsService.layer("100.93.3.29", 4222).retry(Schedule.forever),
+      NatsService.layer("100.93.3.29", 4222),
       PresistenceService.live,
-      Quill.Postgres.fromNamingStrategy(SnakeCase),
+      Quill.Postgres.fromNamingStrategy(Literal),
       Quill.DataSource.fromPrefix("TSConfig")
     )
     .exitCode
@@ -32,12 +32,12 @@ object Stasi extends ZIOAppDefault {
           decode[DeviceHeartBeat](body)
         )
         .mapZIOParUnordered(4)(_ match
-          case Left(error) => ZIO.logError(s"failed to encode json")
-          case Right(dhb)  => PresistenceService.insertDeviceHeartBeat(dhb)
+          case Left(error) =>
+            ZIO.logError(s"failed to encode json ${error.toString()}")
+          case Right(dhb) => PresistenceService.insertDeviceHeartBeat(dhb)
         )
         .runDrain
-        .fork
-      r <- s.join
-    } yield (r)
+        .catchAllCause(ZIO.logInfoCause(_))
+    } yield (s)
   }
 }
